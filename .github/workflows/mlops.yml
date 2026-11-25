@@ -1,0 +1,48 @@
+
+name: MLOps - Bitcoin Order Model
+
+on:
+  push:
+    branches:
+      - mlops-workshop
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  train-and-test:
+    name: Train and Test ML Model
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install ML dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r ml/requirements.txt
+          pip install pytest
+
+      - name: Train ML model
+        run: python ml/train.py
+
+      - name: Run automated model tests
+        run: python -m pytest ml/test_model.py -v
+
+      - name: Upload ML artifacts
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bitcoin-ml-model
+          path: |
+            ml/*.joblib
+            ml/*.pkl
+            ml/*.json
+          if-no-files-found: warn

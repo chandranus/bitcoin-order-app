@@ -1,10 +1,10 @@
-
 name: MLOps - Bitcoin Order Model
 
 on:
   push:
     branches:
       - mlops-workshop
+
   workflow_dispatch:
 
 permissions:
@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
 
@@ -36,13 +36,17 @@ jobs:
       - name: Run automated model tests
         run: python -m pytest ml/test_model.py -v
 
+      - name: Verify model artifacts
+        run: |
+          ls -lh ml/artifacts/
+          test -s ml/artifacts/risk_model.joblib
+          test -s ml/artifacts/metrics.json
+
       - name: Upload ML artifacts
-        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: bitcoin-ml-model
           path: |
-            ml/*.joblib
-            ml/*.pkl
-            ml/*.json
-          if-no-files-found: warn
+            ml/artifacts/risk_model.joblib
+            ml/artifacts/metrics.json
+          if-no-files-found: error

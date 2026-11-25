@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 import joblib
 
-ARTIFACTS = Path("ml/artifacts")
+ARTIFACTS = Path(__file__).resolve().parent / "artifacts"
 
 def test_model_and_metrics():
     model = joblib.load(ARTIFACTS / "risk_model.joblib")
@@ -10,5 +10,5 @@ def test_model_and_metrics():
     assert hasattr(model, "predict")
     assert metrics["dataset"] == "synthetic"
     assert metrics["accuracy"] >= 0.80
-
-
+    assert metrics["training_samples"] == 1500
+    assert metrics["testing_samples"] == 500
